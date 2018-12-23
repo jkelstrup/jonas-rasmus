@@ -1,0 +1,9 @@
+.good :global(.tick-flip-panel) {
+  color: white;
+  background-color: forestgreen;
+}
+
+.bad :global(.tick-flip-panel) {
+  color: white;
+  background-color: firebrick;
+}
