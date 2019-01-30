@@ -383,7 +383,7 @@
 .tick-flip {
   margin-left: 0.0625em;
   margin-right: 0.0625em;
-  width: 1.2em;
+  min-width: 1.3em;
   border-radius: 0.125em;
   letter-spacing: 0.25em;
   text-indent: 0.25em;

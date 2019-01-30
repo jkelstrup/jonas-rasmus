@@ -23,17 +23,17 @@ const Ticker = (props) => {
     classNames += styles.good
   }
 
-
   return (
     <div
       className={ classNames }
       data-value={ props.val }
     >
-      <div data-repeat="true" data-transform={ transform }>
+      <div data-repeat="false" data-transform={ transform }>
         <span data-view="flip"></span>
       </div>
     </div>
   );
+
 };
 
 export default Ticker;

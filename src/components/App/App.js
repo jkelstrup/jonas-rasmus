@@ -4,7 +4,10 @@ import * as firebase from 'firebase';
 
 // Components
 import { Row, Col } from 'src/components/Box/Box.js';
-import Ticker from 'src/components/Ticker/Ticker';
+import Difference from 'src/components/Difference/Difference';
+import PlayerScore from 'src/components/PlayerScore/PlayerScore';
+import Meta from 'src/components/Meta/Meta';
+import TimePeriod from 'src/components/TimePeriod/TimePeriod';
 
 // Local
 import styles from './App.module.scss';
@@ -14,81 +17,76 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      totalScore: {
+      today: false,
+      jonas: 0,
+      rasmus: 0,
+      gamesPlayed: 0,
+      today: {
         jonas: 0,
-        rasmus: 0
-      },
-      gamesPlayed: 0
+        rasmus: 0,
+        gamesPlayed: 0,
+        timestamp: 0
+      }
     };
+  }
+
+  updateScores(data) {
+    this.setState((prevState, props) => {
+      return {
+        jonas: prevState.jonas += data.jonas,
+        rasmus: prevState.rasmus += data.rasmus,
+        gamesPlayed: prevState.gamesPlayed += 1
+      }
+    })
   }
 
   componentDidMount() {
     firebase.database().ref('results').on('child_added', (data) => {
-      this.setState((prevState, props) => {
-        return {
-          gamesPlayed: prevState.gamesPlayed += 1,
-          totalScore: {
-            jonas: prevState.totalScore.jonas += data.val().jonas,
-            rasmus: prevState.totalScore.rasmus += data.val().rasmus,
-          }
-        }
-      })
+      this.updateScores(data.val())
     })
   }
 
   handleClickMe() {
-    let totalScore = Math.floor(Math.random()*(16-11+1)+11);
-    console.log('TOTAL SCORE: ', totalScore);
-    let playerAScore = Math.floor(totalScore*Math.random());
-    console.log('PLAYER A', playerAScore);
-    let playerBScore = totalScore-playerAScore;
-    console.log('PLAYER B', playerBScore);
+    let fakePoints = Math.floor(Math.random()*(16-11+1)+11);
+    let playerAScore = Math.floor(fakePoints*Math.random());
+    let playerBScore = fakePoints-playerAScore;
 
+    this.updateScores({
+      jonas: playerAScore,
+      rasmus: playerBScore,
+      timestamp: new Date()
+    })
+  }
+
+  handleTimePeriodClick() {
     this.setState((prevState, props) => {
       return {
-        gamesPlayed: prevState.gamesPlayed += 1,
-        totalScore: {
-          jonas: prevState.totalScore.jonas += playerAScore,
-          rasmus: prevState.totalScore.rasmus += playerBScore,
-        }
+        ...prevState,
+        today: !prevState.today
       }
     })
   }
 
   render() {
-    let dealer = ' Jonas';
-    if (this.state.gamesPlayed % 2 === 0) {
-      dealer = 'Rasmus';
-    }
+
+    let { jonas, rasmus, gamesPlayed } = this.state;
 
     return (
       <Col h='100%' className={ styles.App }>
-        <Row xcenter className={ styles.Difference } onClick={() => this.handleClickMe()}>
-          <Ticker val={ dealer }/>: #<Ticker pad={'000'} val={ this.state.gamesPlayed }/>
-        </Row>
+        <Meta nextGame={ gamesPlayed + 1 }/>
         <Row className={ styles.Score }>
-          <Col xcenter>
-            <Row className={ styles.Name } xcenter>Jonas</Row>
-            <Ticker
-              num
-              pad={'0000'}
-              val={ this.state.totalScore.jonas }
-              score={ this.state.totalScore.jonas - this.state.totalScore.rasmus }
-            />
-          </Col>
-          <Col xcenter>
-            <Row className={ styles.Name } xcenter>Rasmus</Row>
-            <Ticker
-              num
-              pad={'0000'}
-              val={ this.state.totalScore.rasmus }
-              score={ this.state.totalScore.rasmus - this.state.totalScore.jonas }
-            />
-          </Col>
+          <PlayerScore
+            name='Jonas'
+            val={ jonas }
+            score={ jonas - rasmus }
+          />
+          <PlayerScore
+            name='Rasmus'
+            val={ rasmus }
+            score={ rasmus - jonas }
+          />
         </Row>
-        <Row xcenter className={ styles.Difference }>
-          <Ticker num pad={'000'} val={ Math.abs(this.state.totalScore.rasmus - this.state.totalScore.jonas) }/>
-        </Row>
+        <Difference val={ Math.abs(rasmus - jonas) }/>
       </Col>
     );
   }
